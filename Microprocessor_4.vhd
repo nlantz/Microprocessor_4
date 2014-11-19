@@ -43,14 +43,14 @@ COMPONENT DEC_4 is
 end COMPONENT;
 
 COMPONENT Register_4bit is
-    Port ( Input : in  STD_LOGIC_VECTOR (4 downto 0);
+    Port ( Input : in  STD_LOGIC_VECTOR (3 downto 0);
            EN : in  STD_LOGIC;
            clk : in  STD_LOGIC;
            clear : in  STD_LOGIC;	-- This is active high
-           Output : out  STD_LOGIC_VECTOR (4 downto 0));
+           Output : out  STD_LOGIC_VECTOR (3 downto 0));
 end COMPONENT;
 
-signal A, B, ALU_out, REG_4_2_out : STD_LOGIC_VECTOR(4 downto 0); 
+signal A, B, ALU_out, REG_4_2_out : STD_LOGIC_VECTOR(3 downto 0); 
 signal ALU_cout, REG_and : STD_LOGIC;
 signal DEC_out : STD_LOGIC_VECTOR(15 downto 0);
 
@@ -61,12 +61,12 @@ REG_and <= DEC_out(0) and DEC_out(15);
 
 ALU_1 : ALU port map(A, B, ALU_out, '0',  ALU_cout, LOGIC, INVERT, nAONLY);
 
-REG_8_1 : Register_4bit port map(ALU_out, ACCUMULATORIE, CLK, CLEAR, B);
-REG_8_2 : Register_4bit port map(A, REG_and, CLK, REG_CLR, REG_8_2_out);
+REG_4_1 : Register_4bit port map(ALU_out, ACCUMULATORIE, CLK, CLEAR, B);
+REG_4_2 : Register_4bit port map(A, REG_and, CLK, REG_CLR, REG_8_2_out);
 
-BUF_8_1 : Buffer_4bit port map( B, ACCUMULATOROE, ACCUMULATOROE, A);
-BUF_8_2 : Buffer_4bit port map( REG_8_2_out, READ1, DEC_OUT(15), A);
-BUF_8_3 : Buffer_4bit port map( BUFFER_IN, DEC_OUT(0), READ1, A);
+BUF_4_1 : Buffer_4bit port map( B, ACCUMULATOROE, ACCUMULATOROE, A);
+BUF_4_2 : Buffer_4bit port map( REG_8_2_out, READ1, DEC_OUT(15), A);
+BUF_4_3 : Buffer_4bit port map( BUFFER_IN, DEC_OUT(0), READ1, A);
 
 DEC_4_1 : DEC_4 port map('1', DEC_IN, DEC_out);
 
