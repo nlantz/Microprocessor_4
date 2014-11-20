@@ -7,17 +7,17 @@ entity Microprocessor_4 is
 			  nAONLY : in  STD_LOGIC;
            INVERT : in  STD_LOGIC;
            LOGIC : in  STD_LOGIC;
-           ACCUMULATORIE : in  STD_LOGIC;
-           CLEAR : in  STD_LOGIC;
-           ACCUMULATOROE : in  STD_LOGIC;
-           WRITE1 : in  STD_LOGIC;
-           READ1 : in  STD_LOGIC;
+			  READ_WRITE : in  STD_LOGIC_VECTOR (1 downto 0);
+          -- ACCUMULATORIE : in  STD_LOGIC;
+          -- CLEAR : in  STD_LOGIC;
+          -- ACCUMULATOROE : in  STD_LOGIC;
+          -- WRITE1 : in  STD_LOGIC;
+          -- READ1 : in  STD_LOGIC;
            BUFFER_IN : in  STD_LOGIC_VECTOR (3 downto 0);
-           A_OUT : out  STD_LOGIC_VECTOR (3 downto 0);
-			  DEC_IN : in  STD_LOGIC_VECTOR (3 downto 0);
-			  REG_CLR : in STD_LOGIC;
-			  AN: in std_logic_vector(3 downto 0);								-- 4-bit anode controller
-		     SSEG: in std_logic_vector(6 downto 0));
+			 -- DEC_IN : in  STD_LOGIC_VECTOR (3 downto 0);
+			 -- REG_CLR : in STD_LOGIC;
+			  AN: out std_logic_vector(3 downto 0);								-- 4-bit anode controller
+		     SSEG: out std_logic_vector(6 downto 0));
 end Microprocessor_4;
 
 architecture Behavioral of Microprocessor_4 is
@@ -62,14 +62,44 @@ COMPONENT display_controller is
 		);
 end COMPONENT;
 
-signal A, B, ALU_out, REG_4_2_out : STD_LOGIC_VECTOR(3 downto 0); 
-signal ALU_cout, REG_and : STD_LOGIC;
+signal A, B, ALU_out, REG_4_2_out, DEC_IN : STD_LOGIC_VECTOR(3 downto 0); 
+signal ALU_cout, REG_and, REG_CLR, READ1, WRITE1, CLEAR, ACCUMULATOROE, ACCUMULATORIE : STD_LOGIC;
 signal DEC_out : STD_LOGIC_VECTOR(15 downto 0);
 
 begin
-A_OUT <= A;
 
-REG_and <= DEC_out(0) and DEC_out(15); 
+
+--process to control the read write switches
+process(clk, READ_WRITE)
+begin
+	if READ_WRITE = "00" then 			--Buffer to bus A
+		DEC_IN <= x"0";
+		READ1 <= '1';
+		WRITE1 <= '0';
+		ACCUMULATOROE <= '0';
+		ACCUMULATORIE <= '0';
+	elsif READ_WRITE = "01" then		--Stored to Bus A
+		DEC_IN <= x"F";
+		READ1 <= '1';
+		WRITE1 <= '0';
+		ACCUMULATOROE <= '0';
+		ACCUMULATORIE <= '0';
+	elsif READ_WRITE = "10" then		--ALU to bus A
+		DEC_IN <= x"0";
+		READ1 <= '0';
+		WRITE1 <= '0';
+		ACCUMULATOROE <= '1';
+		ACCUMULATORIE <= '1';
+	else										--ALU to storage
+		DEC_IN <= x"F";
+		READ1 <= '0';
+		WRITE1 <= '1';
+		ACCUMULATOROE <= '1';
+		ACCUMULATORIE <= '1';
+	end if;
+end process;
+
+REG_and <= WRITE1 and DEC_out(15); 
 
 ALU_1 : ALU port map(A, B, ALU_out, '0',  ALU_cout, LOGIC, INVERT, nAONLY);
 
@@ -82,7 +112,7 @@ BUF_4_3 : Buffer_4bit port map( BUFFER_IN, DEC_OUT(0), READ1, A);
 
 DEC_4_1 : DEC_4 port map('1', DEC_IN, DEC_out);
 
-DISP_CONT : display_controller port map( CLK, CLEAR, A, B, REG_4_2_out, "0000", AN, SSEG);
+DISP_CONT : display_controller port map( CLK, CLEAR, A, B, ALU_out, REG_4_2_out, AN, SSEG);
 
 end Behavioral;
 
