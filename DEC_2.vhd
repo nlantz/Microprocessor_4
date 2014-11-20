@@ -30,7 +30,7 @@ signal temp_Y0, temp_Y1 : std_logic := '0';
 
 begin
 -- instantiate and port map the first DEC_1
-DEC_11 : entity work.DEC_1 port map (EN, A0, temp_Y0, temp_Y1);
+DEC_11 : entity work.DEC_1 port map (EN, A1, temp_Y0, temp_Y1);
 -- instantiate and port map the second DEC_1
 DEC_12 : entity work.DEC_1 port map (temp_Y0, A0 , Y0, Y1);
 -- instantiate and port map the third DEC_1
